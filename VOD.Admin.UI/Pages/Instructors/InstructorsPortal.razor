@@ -1,5 +1,80 @@
-﻿<h3>InstructorsPortal</h3>
+﻿@inject IAdminService AdminService
+
+@if (!string.IsNullOrEmpty(alert))
+{
+        <div class="d-flex">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>@alert</strong>
+                <button type="button" @onclick="CloseAlert" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+}
+@if (Navigation == PageType.Create)
+{
+        <ChangeInstructor Page="@Navigation" OnChange="OnChange"></ChangeInstructor>
+}
+@if (Navigation == PageType.Delete || Navigation == PageType.Edit)
+{
+        <ChangeInstructor Page="@Navigation" OnChange="OnChange" Model="Instructor"></ChangeInstructor>
+}
+
+<div class="d-flex me-1">
+    <a href="/" class="btn btn-outline-secondary rounded-0 me-1">Home</a>
+    <button type="button" class="btn btn-outline-primary rounded-0 me-1" @onclick="()=>ChangePageType(PageType.Index)">Index</button>
+    <button type="button" class="btn btn-outline-success rounded-0" @onclick="()=>ChangePageType(PageType.Create)">Create</button>
+</div>
+
+<InstructorIndex OnClick="OnClick" Model="Model"></InstructorIndex>
 
 @code {
+    List<InstructorDTO> Model { get; set; } = new();
+    public InstructorDTO Instructor { get; set; } = new();
+    string Navigation { get; set; } = PageType.Index;
+    string alert { get; set; } = "";
 
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        //clear any message and hide the alert.
+        alert = "";
+        Model = await AdminService.GetAsync<InstructorDTO>("instructors");
+
+    }
+
+    //changes the value of the Navigation property
+
+    void ChangePageType(string pageType)
+    {
+        Navigation = pageType;
+    }
+
+    //assigns an empty string to the Alert property
+    //to clear any message and hide the alert when its X button is clicked
+    void CloseAlert()
+    {
+        alert = "";
+    }
+
+    async Task OnClick(ClickModel model)
+    {
+        if (model.PageType.Equals(PageType.Edit) || model.PageType.Equals(PageType.Delete))
+            Instructor = await AdminService.SingleAsync<InstructorDTO>($"instructors/{model.Id}") ?? new();
+
+        ChangePageType(model.PageType);
+    }
+
+    async Task OnChange(string alert)
+    {
+        try
+        {
+            alert = alert;
+            Model = await AdminService.GetAsync<InstructorDTO>("instructors");
+            ChangePageType(PageType.Index);
+        }
+        catch
+        {
+            alert = "Couldn't create/edit/delete the instructor.";
+        }
+    }
 }

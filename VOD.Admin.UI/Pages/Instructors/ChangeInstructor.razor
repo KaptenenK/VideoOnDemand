@@ -1,0 +1,82 @@
+﻿@inject IAdminService AdminService
+
+<div class="d-xl-flex justify-content-center">
+    <EditForm Model="@Model" OnValidSubmit="@OnFormSubmit" class="mb-5 border border-1 border-secondary p-2 w-25">
+        <DataAnnotationsValidator />
+        <h4>@Page Instructor</h4>
+        <div class="mb-3">
+            @if (Page.Equals(PageType.Delete))
+            {
+                <InputText id="name" class="form-control me-2" @bind-Value="Model.Name" disabled placeholder="Name"></InputText>
+            }
+            else
+            {
+                <InputText id="name" class="form-control me-2" @bind-Value="Model.Name" placeholder="Name"></InputText>
+            }
+            <ValidationMessage For="@(() => Model.Name)" />
+        </div>
+        @if (!Page.Equals(PageType.Delete))
+        {
+            <div class="mb-3">
+                <InputText id="Name" class="form-control me-2" @bind-Value="Model.Name" placeholder="Fullständig Namn"></InputText>
+                <ValidationMessage For="@(() => Model.Name)" />
+            </div>
+            <div class="mb-3">
+                <InputText id="description" class="form-control me-2" @bind-Value="Model.Description" placeholder="Description"></InputText>
+                <ValidationMessage For="@(() => Model.Description)" />
+            </div>
+            <div class="mb-3">
+                <InputText id="avatar" class="form-control me-2" @bind-Value="Model.Avatar" placeholder="Avatar url"></InputText>
+                <ValidationMessage For="@(() => Model.Avatar)" />
+            </div>
+           
+        }
+        <button type="submit" class="btn btn-@(Page.Equals(PageType.Delete) ? "danger" : "primary") rounded-0">@Page</button>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public InstructorDTO Model { get; set; } = new();
+
+    [Parameter]
+    public string Page { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> OnChange { get; set; }
+
+    List<InstructorDTO> Instructors { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AdminService.GetAsync<InstructorDTO>("instructors");
+    }
+
+
+    async Task OnFormSubmit()
+    {
+        try
+        {
+            if (Page.Equals(PageType.Create))
+            {
+                await AdminService.CreateAsync<InstructorDTO>("instructors", Model);
+            }
+            if (Page.Equals(PageType.Edit))
+            {
+                await AdminService.EditAsync<InstructorDTO>($"instructors/{Model.Id}", Model);
+            }
+            if (Page.Equals(PageType.Delete))
+            {
+                await AdminService.DeleteAsync<InstructorDTO>($"instructors/{Model.Id}");
+            }
+
+            await OnChange.InvokeAsync("");
+        }
+
+        catch
+        {
+            await OnChange.InvokeAsync("Kunde inte skapa, redigera eller ta bort en course.");
+        }
+
+    }
+}

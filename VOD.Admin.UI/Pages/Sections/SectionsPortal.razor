@@ -1,5 +1,85 @@
-﻿<h3>SectionsPortal</h3>
+﻿@inject IAdminService AdminService
+
+
+@if (!string.IsNullOrEmpty(alert))
+{
+    <div class="d-flex">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>@alert</strong>
+            <button type="button" @onclick="CloseAlert" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+}
+@if (Navigation == PageType.Create)
+{
+    <ChangeSections Page="@Navigation" OnChange="OnChange"></ChangeSections>
+}
+@if (Navigation == PageType.Delete || Navigation == PageType.Edit)
+{
+    <ChangeSections Page="@Navigation" OnChange="OnChange" Model="Section"></ChangeSections>
+}
+
+<div class="d-flex me-1">
+    <a href="/" class="btn btn-outline-secondary rounded-0 me-1">Home</a>
+    <button type="button" class="btn btn-outline-primary rounded-0 me-1" @onclick="()=>ChangePageType(PageType.Index)">Index</button>
+    <button type="button" class="btn btn-outline-success rounded-0" @onclick="()=>ChangePageType(PageType.Create)">Create</button>
+</div>
+
+<SectionsIndex OnClick="OnClick" Model="Model"></SectionsIndex>
+
+
 
 @code {
+
+    List<SectionDTO> Model { get; set; } = new();
+    public SectionDTO Section { get; set; } = new();
+    string Navigation { get; set; } = PageType.Index;
+    string alert { get; set; } = "";
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        //clear any message and hide the alert.
+        alert = "";
+        Model = await AdminService.GetAsync<SectionDTO>("sections");
+
+    }
+
+    //changes the value of the Navigation property
+
+    void ChangePageType(string pageType)
+    {
+        Navigation = pageType;
+    }
+
+    //assigns an empty string to the Alert property
+    //to clear any message and hide the alert when its X button is clicked
+    void CloseAlert()
+    {
+        alert = "";
+    }
+
+    async Task OnClick(ClickModel model)
+    {
+        if (model.PageType.Equals(PageType.Edit) || model.PageType.Equals(PageType.Delete))
+            Section = await AdminService.SingleAsync<SectionDTO>($"sections/{model.Id}") ?? new();
+
+        ChangePageType(model.PageType);
+    }
+
+    async Task OnChange(string alert)
+    {
+        try
+        {
+            alert = alert;
+            Model = await AdminService.GetAsync<SectionDTO>("sections");
+            ChangePageType(PageType.Index);
+        }
+        catch
+        {
+            alert = "Couldn't create/edit/delete the section.";
+        }
+    }
 
 }

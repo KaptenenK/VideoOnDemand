@@ -9,11 +9,9 @@
   <ItemGroup>
     <Folder Include="HttpClients\" />
     <Folder Include="Classes\" />
-    <Folder Include="Services\" />
     <Folder Include="Authentication\" />
     <Folder Include="JWT\" />
     <Folder Include="Models\" />
-    <Folder Include="Extensions\" />
   </ItemGroup>
 
 </Project>
