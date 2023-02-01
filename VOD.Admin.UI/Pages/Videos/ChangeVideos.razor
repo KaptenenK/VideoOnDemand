@@ -9,10 +9,7 @@
             {
                 <InputText id="title" class="form-control me-2" @bind-Value="Model.Title" disabled placeholder="Title"></InputText>
             }
-            else
-            {
-                <InputText id="title" class="form-control me-2" @bind-Value="Model.Title" placeholder="Title"></InputText>
-            }
+            
             <ValidationMessage For="@(() => Model.Title)" />
         </div>
         @if (!Page.Equals(PageType.Delete))
@@ -28,6 +25,10 @@
             <div class="mb-3">
                 <InputText id="thumbnail" class="form-control me-2" @bind-Value="Model.Thumbnail" placeholder="Thumbnail"></InputText>
                 <ValidationMessage For="@(() => Model.Thumbnail)" />
+            </div>
+            <div class="mb-3">
+                <InputText id="url" class="form-control me-2" @bind-Value="Model.Url" placeholder="Url"></InputText>
+                <ValidationMessage For="@(() => Model.Url)" />
             </div>
 
             <InputSelect @bind-Value="Model.SectionId" class="form-control mb-3">
